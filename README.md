@@ -9,7 +9,7 @@ The AppController Dynamically creates the methods of the basic CRUD operations i
  		public function admin_index(){
     		parent::admin_index();
     		$variable = $this->Home->find('list');
-    		$this->set(compact('variable));
+    		$this->set(compact('variable'));
 		}
 	}
 
