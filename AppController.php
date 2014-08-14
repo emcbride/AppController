@@ -15,7 +15,13 @@ class AppController extends Controller {
 				'action' => 'login',
 				'admin' => false,
 				'plugin' => false,
-			),	
+			),
+			//Simple is getting depreciated in Cake 3.0
+            //'authenticate' => array(
+            //    'Form' => array(
+            //        'passwordHasher' => 'Blowfish'
+            //    )
+            //)	
 		),
 		'Session',
 	);
@@ -49,7 +55,7 @@ class AppController extends Controller {
 		$this->request->data = $this->paginate();
 		$this->set(Inflector::pluralize(Inflector::tableize($this->modelClass)), $this->request->data);
 	}
-	
+
 	/**
 	 * Index Method
 	 *
@@ -62,7 +68,7 @@ class AppController extends Controller {
 		$this->set(Inflector::pluralize(Inflector::tableize($this->modelClass)), $this->request->data);
 
 	}
-	
+
 	/**
 	 * Admin Add Method
 	 *
@@ -81,6 +87,28 @@ class AppController extends Controller {
 		}		
 	}
 	
+	/**
+	 * Admin Edit Method
+	 *
+	 * @params void
+	 * @return void
+	 */	
+	public function admin_edit($id = null) {
+		$model_name = $this->modelClass;
+		if (!$this->{$model_name}->exists($id)) {
+			throw new notFoundException('Row does not exist');
+		}
+		if ($this->request->is('post') || $this->request->is('put')) {
+			if ($this->{$model_name}->saveAll($this->request->data)) {
+				$this->Session->setFlash(__('The '. $model_name .' Added Successfully.'), 'flash_good');
+				$this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The '. $model_name .' could not be saved.'), 'flash_bad');
+			}
+		}
+		$this->request->data = $this->{$model_name}->findById($id);		
+	}
+
 	/**
 	 * Admin Delete Method
 	 *
@@ -105,26 +133,21 @@ class AppController extends Controller {
 	/**
 	 * View Method
 	 *
-	 * @params int $slug
+	 * @params int $id
 	 * @return void
 	 */
-   public function view($slug = null, $id = null) {
+   public function view($id = null) {
         $modelName = $this->modelClass;
-        debug($modelName);
-        if (!$slug) {
-                throw new NotFoundException('Invalid '. $modelName .' Slug');
+        if ($this->{$modelName}->hasField('slug')) {
+        	$conditions['condition'][$modelName.'.slug'] = $id;
+        } else {
+        	$conditions['condition'][$modelName.'.id'] = $id;
         }
-        
-        $property = $this->Property->find('first', array('conditions' => array('Property.slug' => $property_slug)));
-        if (empty($property)) {
-        	$this->Session->setFlash('That property is no longer available', 'flash_notice');
+        $requested_information = $this->{$modelName}->find('first', $conditions);
+        if (empty($requested_information)) {
+        	$this->Session->setFlash($modelName.' does not exist!', 'flash_bad');
 			$this->redirect(array('action' => 'index'));
         }
-		
-		$this->set(compact('property'));
-    }       	
-
-
-	
-	
+		$this->set(compact('requested_information'));
+    }         	
 }
