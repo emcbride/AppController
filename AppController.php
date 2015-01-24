@@ -2,7 +2,8 @@
 /**
  * AppController.php Controller
  *
- * @author Eric McBride <emcbride@csdurant.com> 
+ * @author Eric McBride <ericmcbridedeveloper@gmail.com>
+ * @author Colton Robertson <colt.robertson86@gmail.com>
  */
 App::uses('Controller', 'Controller');
 class AppController extends Controller {
